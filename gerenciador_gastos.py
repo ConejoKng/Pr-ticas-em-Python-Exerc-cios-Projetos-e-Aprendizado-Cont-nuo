@@ -14,7 +14,7 @@ def programa():
                 "2 - Gerenciador de Tarefas\n" \
                 "3 - Sair\n" \
                 "Respostas: "))
-                if opcao < 0 or opcao > 3:
+                if opcao < 1 or opcao > 3:
                     print("Opção invalida")
                 else:
                     break
@@ -118,6 +118,46 @@ def gerenciadorGastos():
             gastos.pop(id - 1)
             print("Gasto excluido com sucesso!")
             input("Pressione ENTER para continuar...")
+    
+    def calcularGasto():
+        limparTela()
+        while True:
+            while True: 
+                try:
+                    opcao = int(input("Escolha uma opção: \n" \
+                    "1 - Calcular Soma\n" \
+                    "2 - Calcular Media\n" \
+                    "3 - Voltar\n" \
+                    "Resposta: "))
+                    if opcao < 1 or opcao > 3:
+                        print("Opção invalida!")
+                    else:
+                        break
+                except ValueError:
+                    print("Use somente numeros inteiros!")
+            
+            if opcao == 1:
+                print("=====Calcular Soma=====")
+                total = 0
+                for gasto in gastos:
+                    total += gasto['valor']
+                print(f"O seu total de gastos foi: {total}")
+                total = 0
+                input("Pressione ENTER para continuar...")
+                limparTela()
+            
+            elif opcao == 2:
+                print("=====Calcular Media=====")
+                media = 0
+                for gasto in gastos:
+                    media += gasto['valor'] / len(gastos)
+                print(f"A sua media de gastos foi: {media}")
+                media = 0
+                input("Pressione ENTER para continuar...")
+                limparTela()
+            
+            else:
+                break
 
     def principal():
         while True:
@@ -130,7 +170,8 @@ def gerenciadorGastos():
                     "2 - Listar Gastos\n" \
                     "3 - Marcar como pago\n" \
                     "4 - Remover gasto\n" \
-                    "5 - sair\n" \
+                    "5 - Calcular Gastos\n" \
+                    "6 - Sair\n" \
                     "Resposta: "))
                     break
                 except ValueError:
@@ -149,6 +190,9 @@ def gerenciadorGastos():
                 excluirgasto()
 
             elif opcao == 5:
+                calcularGasto()
+
+            elif opcao == 6:
                 print("Encerrando o sistema...")
                 break
 
@@ -240,6 +284,7 @@ def gerenciadorTarefas():
     def principal():
         while True:
             limparTela()
+            print("=====Gerenciador de Tarefas=====")
             while True:
                 try:
                     opcao = int(input("Escolha uma opção:\n" \
