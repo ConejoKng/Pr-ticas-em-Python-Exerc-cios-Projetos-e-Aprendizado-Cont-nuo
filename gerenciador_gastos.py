@@ -34,6 +34,18 @@ def programa():
 
 def gerenciadorGastos():
     gastos = []
+    categorias = [
+        "Moradia",
+        "Alimentação",
+        "Transporte",
+        "Saúde",
+        "Educação",
+        "Lazer",
+        "Serviços",
+        "Compras",
+        "Investimentos",
+        "Dívidas"
+        ]
 
     def msg():
         print("Use numeros inteiros!")
@@ -49,7 +61,19 @@ def gerenciadorGastos():
         for i in range(quantidade):
             print("====================")
             nome = input(f"{i + 1} - Nome do gasto: ")
-            tipo = input(f"{i + 1} - Tipo do gasto: ")
+            print("Qual o tipo do gasto?: ")
+            for i in range(len(categorias)):
+                print(f"{i + 1} - {categorias[i]}")
+            while True:
+                try:
+                    escolha = int(input(f"Digite o numero do gasto: "))
+                    if escolha < 1 or escolha > len(categorias):
+                        print("Opção Invalida!")
+                    else:
+                        break
+                except ValueError:
+                    print("Use numeros inteiros!")
+            tipo = categorias[escolha - 1]
             while True:
                 try:
                     valor = float(input(f"{i + 1} - Quanto custou?: "))
@@ -126,10 +150,11 @@ def gerenciadorGastos():
                 try:
                     opcao = int(input("Escolha uma opção: \n" \
                     "1 - Calcular Soma\n" \
-                    "2 - Calcular Media\n" \
-                    "3 - Voltar\n" \
+                    "2 - Filtrar por categorias\n" \
+                    "3 - Calcular Media\n" \
+                    "4 - Voltar\n" \
                     "Resposta: "))
-                    if opcao < 1 or opcao > 3:
+                    if opcao < 1 or opcao > 4:
                         print("Opção invalida!")
                     else:
                         break
@@ -138,15 +163,34 @@ def gerenciadorGastos():
             
             if opcao == 1:
                 print("=====Calcular Soma=====")
-                total = 0
+                totalSoma = 0
                 for gasto in gastos:
-                    total += gasto['valor']
-                print(f"O seu total de gastos foi: {total}")
-                total = 0
+                    totalSoma += gasto['valor']
+                print(f"O seu total de gastos foi: {totalSoma}")
+                totalSoma = 0
                 input("Pressione ENTER para continuar...")
                 limparTela()
-            
+
             elif opcao == 2:
+                totalCategorias = {}
+
+                for gasto in gastos:
+                    categoria = gasto['tipo']
+                    valor = gasto['valor']
+
+                    if categoria not in totalCategorias:
+                        totalCategorias[categoria] = valor
+                    else:
+                        totalCategorias[categoria] += valor
+
+                for categoria, total in totalCategorias.items():
+                    print(f"{categoria}: {total}")
+
+                input("Pressione ENTER para continuar...")
+                limparTela()
+
+
+            elif opcao == 3:
                 print("=====Calcular Media=====")
                 media = 0
                 for gasto in gastos:
