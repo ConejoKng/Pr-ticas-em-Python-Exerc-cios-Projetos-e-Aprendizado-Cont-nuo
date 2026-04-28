@@ -248,6 +248,11 @@ def gerenciadorGastos():
 
 def gerenciadorTarefas():
     tarefas = []
+    importancias = [
+        "Alta",
+        "Media",
+        "Baixa"
+    ]
 
     def incluirTarefa():
         limparTela()
@@ -260,11 +265,22 @@ def gerenciadorTarefas():
         for i in range(quantidade):
             print("====================")
             descricao = input("Descrição: ")
-            importancia = input("Importanca: ")
+            print("Qual a importancia?: ")
+            for i in range(len(importancias)):
+                print(f"{i + 1} - {importancias[i]}")
+            while True:
+                try:
+                    importancia = int(input("Importanca: "))
+                    if importancia < 1 or importancia > len(importancias):
+                        print("Opção invalida!")
+                    else:
+                        break
+                except ValueError:
+                    print("Use numeros inteiros")
             status = False
             tarefa = {
                 'descricao': descricao,
-                'importancia': importancia,
+                'importancia': importancias[importancia - 1],
                 'status': status
             }
             tarefas.append(tarefa)
