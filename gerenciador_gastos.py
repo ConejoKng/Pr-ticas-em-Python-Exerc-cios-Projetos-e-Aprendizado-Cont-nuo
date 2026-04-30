@@ -3,23 +3,34 @@ import os
 def limparTela():
     os.system('cls') 
 
+def tratarErroInt(mensagem, minimo, maximo):
+    while True:
+        try:
+            valor = int(input(mensagem))
+            if valor < minimo or valor > maximo:
+                print("Opção Invalida!")
+            else:
+                return valor
+        except ValueError:
+            print("Use numeros inteiros")
+
+def tratarErroPergunta(mensagem):
+    while True:
+        try:
+            valor = int(input(mensagem))
+            return valor
+        except ValueError:
+            print("Use numeros inteiros")
+
 
 def programa():
     while True:
         limparTela()
-        while True:
-            try:
-                opcao = int(input("Escolha o sistema:\n" \
-                "1 - Gerenciador de gastos\n" \
-                "2 - Gerenciador de Tarefas\n" \
-                "3 - Sair\n" \
-                "Respostas: "))
-                if opcao < 1 or opcao > 3:
-                    print("Opção invalida")
-                else:
-                    break
-            except ValueError:
-                print("Opção invalida")
+        opcao = tratarErroInt("Escolha o sistema:\n" \
+        "1 - Gerenciador de gastos\n" \
+        "2 - Gerenciador de Tarefas\n" \
+        "3 - Sair\n" \
+        "Respostas: ", 1, 3)
 
         if opcao == 1:
             gerenciadorGastos()
@@ -47,32 +58,17 @@ def gerenciadorGastos():
         "Dívidas"
         ]
 
-    def msg():
-        print("Use numeros inteiros!")
-
     def adicionarGasto():
         limparTela()
-        while True:
-            try:
-                quantidade = int(input("Quantos Gastos deseja Adicionar?: "))
-                break
-            except ValueError:
-                msg()
+        quantidade = tratarErroPergunta("Quantos Gastos deseja Adicionar?: ")
+
         for i in range(quantidade):
             print("====================")
             nome = input(f"{i + 1} - Nome do gasto: ")
             print("Qual o tipo do gasto?: ")
             for i in range(len(categorias)):
                 print(f"{i + 1} - {categorias[i]}")
-            while True:
-                try:
-                    escolha = int(input(f"Digite o numero do gasto: "))
-                    if escolha < 1 or escolha > len(categorias):
-                        print("Opção Invalida!")
-                    else:
-                        break
-                except ValueError:
-                    print("Use numeros inteiros!")
+            escolha = tratarErroInt("Digite o numero do gasto: ", 1, len(categorias))
             tipo = categorias[escolha - 1]
             while True:
                 try:
@@ -111,15 +107,7 @@ def gerenciadorGastos():
         if len(gastos) == 0:
             return
         else:
-            while True:
-                try:
-                    id = int(input("Qual é o ID do gasto que deseja pagar?: "))
-                    if id - 1 < 0 or id - 1 >= len(gastos):
-                        print("Esse ID não existe")
-                    else:
-                        break
-                except ValueError:
-                    print("ID invalido")
+            id = tratarErroInt("Qual é o ID do gasto que deseja pagar?: ", 1, len(gastos))
             gastos[id - 1]['pago'] = True
             print("Gasto pago com sucesso!")
             input("Pressione ENTER para continuar...")
@@ -130,15 +118,7 @@ def gerenciadorGastos():
         if len(gastos) == 0:
             return
         else:
-            while True:
-                try:
-                    id = int(input("Qual é o ID do gasto que deseja excluir?: "))
-                    if id - 1 < 0 or id - 1 >= len(gastos):
-                        print("Esse ID não existe")
-                    else:
-                        break
-                except ValueError:
-                    print("ID invalido")
+            id = tratarErroInt("Qual é o ID do gasto que deseja remover?: ", 1, len(gastos))
             gastos.pop(id - 1)
             print("Gasto excluido com sucesso!")
             input("Pressione ENTER para continuar...")
@@ -146,20 +126,12 @@ def gerenciadorGastos():
     def calcularGasto():
         limparTela()
         while True:
-            while True: 
-                try:
-                    opcao = int(input("Escolha uma opção: \n" \
-                    "1 - Calcular Soma\n" \
-                    "2 - Filtrar por categorias\n" \
-                    "3 - Calcular Media\n" \
-                    "4 - Voltar\n" \
-                    "Resposta: "))
-                    if opcao < 1 or opcao > 4:
-                        print("Opção invalida!")
-                    else:
-                        break
-                except ValueError:
-                    print("Use somente numeros inteiros!")
+            opcao = tratarErroInt("Escolha uma opção: \n" \
+                "1 - Calcular Soma\n" \
+                "2 - Filtrar por categorias\n" \
+                "3 - Calcular Media\n" \
+                "4 - Voltar\n" \
+                "Resposta: ", 1, 4)
             
             if opcao == 1:
                 print("=====Calcular Soma=====")
@@ -207,19 +179,14 @@ def gerenciadorGastos():
         while True:
             limparTela()
             print("=====Gerenciador de Gastos=====")
-            while True:
-                try:
-                    opcao = int(input("Selecione uma opção: \n" \
-                    "1 - Adicionar gasto\n" \
-                    "2 - Listar Gastos\n" \
-                    "3 - Marcar como pago\n" \
-                    "4 - Remover gasto\n" \
-                    "5 - Calcular Gastos\n" \
-                    "6 - Sair\n" \
-                    "Resposta: "))
-                    break
-                except ValueError:
-                    msg()
+            opcao = tratarErroInt("Selecione uma opção: \n" \
+                "1 - Adicionar gasto\n" \
+                "2 - Listar Gastos\n" \
+                "3 - Marcar como pago\n" \
+                "4 - Remover gasto\n" \
+                "5 - Calcular Gastos\n" \
+                "6 - Sair\n" \
+                "Resposta: ", 1, 6)
 
             if opcao == 1:
                 adicionarGasto()
@@ -240,9 +207,6 @@ def gerenciadorGastos():
                 print("Encerrando o sistema...")
                 break
 
-            else:
-                print("Opção invalida!")
-
     principal()
 
 
@@ -256,27 +220,15 @@ def gerenciadorTarefas():
 
     def incluirTarefa():
         limparTela()
-        while True:
-            try:
-                quantidade = int(input("Quantas tarefas você quer adicionar: "))
-                break
-            except ValueError:
-                print("Escreva numeros inteiros!")
+        quantidade = tratarErroPergunta("Quantas tarefas você quer adicionar: ")
         for i in range(quantidade):
             print("====================")
             descricao = input("Descrição: ")
             print("Qual a importancia?: ")
             for i in range(len(importancias)):
                 print(f"{i + 1} - {importancias[i]}")
-            while True:
-                try:
-                    importancia = int(input("Importanca: "))
-                    if importancia < 1 or importancia > len(importancias):
-                        print("Opção invalida!")
-                    else:
-                        break
-                except ValueError:
-                    print("Use numeros inteiros")
+            importancia = tratarErroInt("Importanca: ", 1, len(importancias))
+            print(f"Selecionado: {importancias[importancia - 1]}")
             status = False
             tarefa = {
                 'descricao': descricao,
@@ -307,16 +259,7 @@ def gerenciadorTarefas():
         if len(tarefas) == 0:
             return
         else:
-            while True:
-                try:
-                    id = int(input("Digite o ID da tarefa que deseja Concluir: "))
-                    if id - 1 < 0 or id - 1 >= len(tarefas):
-                        print("ID Invalido!")
-                    else:
-                        break
-                except ValueError:
-                    print("Use numeros inteiros")
-            
+            id = tratarErroInt("Digite o ID da tarefa que deseja Concluir: ", 1, len(tarefas))
             tarefas[id - 1]['status'] = True
             print("Tarefa concluida com sucesso!")
             input("Pressione ENTER para continuar...")
@@ -327,15 +270,7 @@ def gerenciadorTarefas():
         if len(tarefas) == 0:
             return
         else:
-            while True:
-                try:
-                    id = int(input("Digite o ID da tarefa que deseja excluir: "))
-                    if id - 1 < 0 or id - 1 >= len(tarefas):
-                        print("ID Invalido!")
-                    else:
-                        break
-                except ValueError:
-                    print("Use numeros inteiros")
+            id = tratarErroInt("Digite o ID da tarefa que deseja excluir: ", 1, len(tarefas))
 
             tarefas.pop(id - 1)
             print("Tarefa excluida com sucesso!")
@@ -345,21 +280,13 @@ def gerenciadorTarefas():
         while True:
             limparTela()
             print("=====Gerenciador de Tarefas=====")
-            while True:
-                try:
-                    opcao = int(input("Escolha uma opção:\n" \
-                    "1 - Incluir tarefa\n" \
-                    "2 - Listar Tarefas\n" \
-                    "3 - Marcar como concluida\n" \
-                    "4 - Excluir tarefa\n" \
-                    "5 - Sair\n" \
-                    "Resultado: "))
-                    if opcao < 0 or opcao > 5:
-                        print("Opção Invalida!")
-                    else:
-                        break
-                except ValueError:
-                    print("Use numeros inteiros!")
+            opcao = tratarErroInt("Escolha uma opção:\n" \
+                "1 - Incluir tarefa\n" \
+                "2 - Listar Tarefas\n" \
+                "3 - Marcar como concluida\n" \
+                "4 - Excluir tarefa\n" \
+                "5 - Sair\n" \
+                "Resultado: ", 1, 5)
 
             if opcao == 1:
                 incluirTarefa()
