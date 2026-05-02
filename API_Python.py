@@ -23,8 +23,12 @@ def listarGastos():
     con, cursor = conexaoBanco()
     print("Conectado com sucesso!\n" \
     "Rota: http://127.0.0.1:5000/gastos/listar")
+    pagina = int(request.args.get("pagina", 1))
+    limite = 10
+    inicio = ((pagina - 1) * limite) + 1
+    fim = inicio + limite - 1
 
-    cursor.execute("SELECT * FROM GASTOS ORDER BY ID ASC")
+    cursor.execute("SELECT * FROM GASTOS ORDER BY ID ROWS ? TO ?", (inicio, fim))
 
     resultado = cursor.fetchall()
 
@@ -120,21 +124,35 @@ def alterarGastos():
     pago = dados["pago"]
 
     cursor.execute("""
-        UPDATE GASTOS
-        SET
-            NOME = ?,
-            TIPO = ?,
-            VALOR = ?,
-            PAGO = ?
-        WHERE ID = ?
-    """, (nome, tipo, valor, pago, id))
+        SELECT * FROM GASTOS
+            WHERE ID = ?
+    """, (id,))
 
-    con.commit()
-    con.close()
+    resultado = cursor.fetchone()
 
-    return jsonify({
-        "Mensagem": "Gasto alterado com sucesso!"
-    })
+    if resultado is None:
+        con.close()
+        return jsonify({
+            "Mensagem": "Esse gasto não existe!"
+        })
+    
+    else: 
+        cursor.execute("""
+            UPDATE GASTOS
+            SET
+                NOME = ?,
+                TIPO = ?,
+                VALOR = ?,
+                PAGO = ?
+            WHERE ID = ?
+        """, (nome, tipo, valor, pago, id))
+
+        con.commit()
+        con.close()
+
+        return jsonify({
+            "Mensagem": "Gasto alterado com sucesso!"
+        })
 
 @app.route("/gastos/excluir", methods=["DELETE"])
 def excluirGasto():
