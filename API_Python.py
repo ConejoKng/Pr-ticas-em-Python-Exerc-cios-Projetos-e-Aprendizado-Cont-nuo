@@ -1,7 +1,30 @@
 from flask import Flask, jsonify, request
+from functools import wraps
 from firebird.driver import connect
 
 app = Flask(__name__)
+USUARIO = "admin"
+SENHA = "1234"
+
+def autenticacao(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+
+        auth = request.authorization
+
+        if not auth:
+            return jsonify({
+                "Mensagem": "Autenticação necessária"
+            }), 401
+
+        if auth.username != USUARIO or auth.password != SENHA:
+            return jsonify({
+                "Mensagem": "Usuário ou senha inválidos"
+            }), 401
+
+        return f(*args, **kwargs)
+
+    return decorated
 
 def conexaoBanco():
     con = connect(
@@ -12,6 +35,14 @@ def conexaoBanco():
     cursor = con.cursor()
     return con, cursor
 
+def transformarGasto(linha):
+        return {
+            "id": linha[0],
+            "nome": linha[1],
+            "tipo": linha[2], 
+            "valor": float(linha[3]),
+            "pago": linha[4]
+        }
 
 
 @app.route("/ping")
@@ -19,6 +50,7 @@ def ping():
     return "pong"
 
 @app.route("/gastos/listar", methods=["GET"])
+@autenticacao
 def listarGastos():
     con, cursor = conexaoBanco()
     print("Conectado com sucesso!\n" \
@@ -43,20 +75,13 @@ def listarGastos():
         gastos = []
 
         for linha in resultado:
-            gasto = {
-                "id": linha[0],
-                "nome": linha[1],
-                "tipo": linha[2], 
-                "valor": float(linha[3]),
-                "pago": linha[4]
-            }
-
-            gastos.append(gasto)
+            gastos.append(transformarGasto(linha))
 
         con.close()
         return jsonify(gastos)
 
 @app.route("/gastos/listar/filtro", methods=["GET"])
+@autenticacao
 def listarGastoFiltro():
     con, cursor = conexaoBanco()
     print("Conectado com sucesso!\n" \
@@ -80,13 +105,7 @@ def listarGastoFiltro():
         })
     
     else:
-        gasto = {
-            "id": resultado[0],
-            "nome": resultado[1],
-            "tipo": resultado[2],
-            "valor": resultado[3],
-            "pago": resultado[4]
-        }
+        gasto = transformarGasto(resultado)
 
         con.close()
         return jsonify(gasto)
@@ -94,6 +113,7 @@ def listarGastoFiltro():
 
 
 @app.route("/gastos/adicionar", methods=["POST"])
+@autenticacao
 def adicionarGasto():
     con, cursor = conexaoBanco()
     print("Conectado com sucesso!\n" \
@@ -118,6 +138,7 @@ def adicionarGasto():
     })
 
 @app.route("/gastos/alterar", methods=["PUT"])
+@autenticacao
 def alterarGastos():
     con, cursor = conexaoBanco()
     print("Conectado com sucesso!\n" \
@@ -163,6 +184,7 @@ def alterarGastos():
         })
 
 @app.route("/gastos/excluir", methods=["DELETE"])
+@autenticacao
 def excluirGasto():
     con, cursor = conexaoBanco()
     print("Conectado com sucesso!\n" \
@@ -198,7 +220,17 @@ def excluirGasto():
             "Mensagem": "Gasto deletado com sucesso!"
         })
     
+
+def transformarTarefa(linha):
+    return {
+        "id": linha[0],
+        "descricao": linha[1],
+        "importancia": linha[2],
+        "status": linha[3]
+    }
+
 @app.route("/tarefas/listar", methods=["GET"])
+@autenticacao
 def listarTarfeas():
     con, cursor = conexaoBanco()
     print("Conectado com sucesso!\n" \
@@ -224,12 +256,7 @@ def listarTarfeas():
         tarefas = []
 
         for linha in resultado:
-            tarefa = {
-                "id": linha[0],
-                "descricao": linha[1],
-                "importancia": linha[2],
-                "status": linha[3]
-            }
+            tarefa = transformarTarefa(linha)
 
             tarefas.append(tarefa)
 
@@ -237,6 +264,7 @@ def listarTarfeas():
         return jsonify(tarefas)
     
 @app.route("/tarefas/listar/filtro", methods=["GET"])
+@autenticacao
 def listarTerefasFitro():
     con, cursor = conexaoBanco()
     print("Conectado com sucesso!\n" \
@@ -258,17 +286,13 @@ def listarTerefasFitro():
             "Mensagem": "Tarefa não encontrada"
         })
     else:
-        tarefa = {
-            "id": resultado[0],
-            "descricao": resultado[1],
-            "importancia": resultado[2],
-            "status": resultado[3]
-        }
+        tarefa = transformarTarefa(resultado)
         
         con.close()
         return jsonify(tarefa)
     
 @app.route("/tarefas/adicionar", methods=["POST"])
+@autenticacao
 def adicionarTarefa():
     con, cursor = conexaoBanco()
     print("Conectado com sucesso!\n" \
@@ -291,6 +315,72 @@ def adicionarTarefa():
         "Mensagem": "Tarefa Adicionada com sucesso!"
     })
 
+@app.route("/tarefas/alterar", methods=["PUT"])
+@autenticacao
+def alterarTarefa():
+    con, cursor = conexaoBanco()
+    print("Conectado com sucesso!\n" \
+    "Rota: http://127.0.0.1:5000/tarefas/alterar")
+    
+    dados = request.get_json()
+
+    id = dados["id"]
+    descricao = dados["descricao"]
+    importancia = dados["importancia"]
+    status = dados["status"]
+
+    cursor.execute("""
+        SELECT * FROM TAREFAS
+            WHERE ID = ?
+""", (id,))
+    
+    resultado = cursor.fetchone()
+    if resultado is None:
+        con.close()
+        return jsonify({
+            "Mensagem": "Essa tarefa não existe"
+        })
+    else: 
+        cursor.execute("""
+            UPDATE TAREFAS
+            SET
+                DESCRICAO = ?,
+                IMPORTANCIA = ?,
+                STATUS = ?
+            WHERE ID = ?
+        """, (descricao, importancia, status, id))
+
+        con.commit()
+        con.close()
+        return jsonify({
+            "Mensagem": "Tarefa alterada com sucesso!"
+        })
+
+@app.route("/tarefas/excluir", methods=["DELETE"])
+@autenticacao
+def excluirTarefa():
+    con, cursor = conexaoBanco()
+    print("Conectado com sucesso!\n" \
+    "Rota: http://127.0.0.1:5000/tarefas/excluir")
+
+    dados = request.get_json()
+
+    id = dados["id"]
+
+    cursor.execute("SELECT * FROM TAREFAS WHERE ID = ?", (id,))
+    resultado = cursor.fetchone()
+    if resultado is None:
+        con.close()
+        return jsonify({
+            "Mensagem": "Essa tarefa não existe"
+        })
+    else: 
+        cursor.execute("DELETE FROM TAREFAS WHERE ID = ?", (id,))
+
+        con.commit()
+        con.close()
+        return jsonify({
+            "Mensagem": "Tarefa excluida com sucesso!"
+        })
 
 app.run(debug=False)
-
